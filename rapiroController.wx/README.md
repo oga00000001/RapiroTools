@@ -1,10 +1,10 @@
-server script
-    rapiro_server.py
-    rapiro.py
+ * server script
+    * rapiro_server.py
+    * rapiro.py
 
-client script
-    wxClient.py
+ * client script
+    * wxClient.py
 
-motion sample file
-    sample81.tx (#M8)
+ * motion sample file
+    * sample81.tx (#M8)
 
