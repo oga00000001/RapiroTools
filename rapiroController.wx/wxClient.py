@@ -16,6 +16,7 @@ PORT = 12345              # The same port as used by the server
 TIME = 1
 MOTION_TIMES = 5
 CONNECTED = False
+VERSION = '#E'
 
 servo_pos = [90,90,0,130,90,180,50,90,90,90,90,90]
 cmd_str = ['S00','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11']
@@ -64,6 +65,23 @@ action_collection = {
     1013:["M9",     "a,#M9\n"],
     1014:["M10",    "a,#M10\n"]
     }
+action_collection0 = {
+    1000:["Analog", "a,#A06\n"],
+    1001:["Foward", "a,#M01\n"],
+    1002:["C",      "a,#C\n"],
+    1003:["M5",     "a,#M05\n"],
+    1004:["M6",     "a,#M06\n"],
+    1005:["Left",   "a,#M04\n"],
+    1006:["STOP",   "a,#M00\n"],
+    1007:["Right",  "a,#M03\n"],
+    1008:["M7",     "a,#M07\n"],
+    1009:["M8",     "a,#M08\n"],
+    1010:["HALT",   "a,#H\n"],
+    1011:["Back",   "a,#M02\n"],
+    1012:["Q"  ,    "a,#Q\n"],
+    1013:["M9",     "a,#M09\n"],
+    1014:["M10",    "a,#M10\n"]
+    }
 
 servo_collection = {
      2000:[-1],
@@ -105,6 +123,7 @@ led_collection = {
 
 class resAnalysis:
     def __init__(self, string):
+        #print string
         self.string = string
         d = re.split('(#?[A-Z][0-9]*)',string)
         self.items = []
@@ -218,13 +237,16 @@ class HostPanel(wx.Panel):
         pass
 
     def connectServer(self):
-        global s, CONNECTED
+        global s, CONNECTED, VERSION
         HOST = self.text_host.GetValue()
         PORT = self.text_port.GetValue()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.connect((HOST, int(PORT)))
             CONNECTED = True
+            VERSION = checkVersion()
+            frame.SetStatusText("Version value is " + str(VERSION))
+
         except:
             self.button_conn.SetLabel(u'CONNECT')
             self.button_conn.SetValue(False)
@@ -248,8 +270,13 @@ class ActionPanel(wx.Panel):
         self.SetSizer(layout)
 
     def click_action(self, event):
+        global VERSION
         try:
-            act = action_collection[event.GetId()]
+            #print VERSION
+            if VERSION == '#E':
+                act = action_collection[event.GetId()]
+            else:
+                act = action_collection0[event.GetId()]
         except:
             pass
         if CONNECTED:
@@ -508,6 +535,10 @@ def clearMotion():
     frame_list = list(frame_tuple)
     index = 0;
 
+def checkVersion():
+    s.send("a, #V\n")
+    v = s.recv(8192)
+    return(v)
 #---------------------------------------------------------------------------
 
 if __name__ == "__main__":
