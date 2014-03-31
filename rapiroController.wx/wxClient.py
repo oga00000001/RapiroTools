@@ -66,7 +66,7 @@ action_collection = {
     1014:["M10",    "a,#M10\n"]
     }
 action_collection0 = {
-    1000:["Analog", "a,#A06\n"],
+    1000:["Analog", "a,#A6\n"],
     1001:["Foward", "a,#M01\n"],
     1002:["C",      "a,#C\n"],
     1003:["M5",     "a,#M05\n"],
@@ -170,7 +170,7 @@ class RapiroFrame(wx.Frame):
         self.GetStatusBar().SetBackgroundColour(None)
 
         #    メニューバーの初期化
-        self.SetMenuBar(RapiroMenu())
+        #self.SetMenuBar(RapiroMenu())
 
         #    本体部分の構築
         root_panel = wx.Panel(self,wx.ID_ANY)
@@ -280,7 +280,7 @@ class ActionPanel(wx.Panel):
         except:
             pass
         if CONNECTED:
-            s.send(act[1])
+            sendCommand(act[1])
             rapiroResponse = s.recv(8192)
             frame.SetStatusText("Received value is " + str(rapiroResponse))
 
@@ -314,7 +314,7 @@ class ServoPanel(wx.Panel):
         command = "a, #PS"+str(sv[0]).zfill(2)+"A"+angle+"T001\n"
         #print command, event.GetId()
         if CONNECTED:
-            s.send(command)
+            sendCommand(command)
             rapiroResponse = s.recv(8192)
             frame.SetStatusText("Received value is " + str(rapiroResponse))
         servo_pos[sv[0]] = angleNum
@@ -352,7 +352,7 @@ class LedPanel(wx.Panel):
         command = "a, #P"+str(color[0])+bright+"T002\n"
         #print command, event.GetId()
         if CONNECTED:
-            s.send(command)
+            sendCommand(command)
             rapiroResponse = s.recv(8192)
             frame.SetStatusText("Received value is " + str(rapiroResponse))
         led_val[color[5]] = brightNum
@@ -413,15 +413,15 @@ class EditPanel(wx.Panel):
                         play_cmd += led + str(bright).zfill(3)
                     play_cmd += "T" + str(frame[15]).zfill(3) + "\n"
                     #print play_cmd
-                    s.send(play_cmd)
+                    sendCommand(play_cmd)
                     rapiroResponse = s.recv(8192)
                     res = resAnalysis(rapiroResponse)
                     w = res.t
                     #print w
                     while(w > 0 ):
                         time.sleep(0.2)
-                        s.send("a, #Q\n")
-                        #s.send("a, #C\n")
+                        sendCommand("a, #Q\n")
+                        #sendCommand("a, #C\n")
                         rapiroResponse = s.recv(8192)
                         res = resAnalysis(rapiroResponse)
                         w = res.t
@@ -536,9 +536,14 @@ def clearMotion():
     index = 0;
 
 def checkVersion():
-    s.send("a, #V\n")
+    sendCommand("a, #V\n")
     v = s.recv(8192)
     return(v)
+def sendCommand(cmd):
+    try:
+        s.send(cmd)
+    except:
+        pass
 #---------------------------------------------------------------------------
 
 if __name__ == "__main__":

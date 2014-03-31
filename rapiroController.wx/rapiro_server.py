@@ -29,9 +29,12 @@ if s is None:
 conn, addr = s.accept()
 print 'Connected by', addr
 while 1:
-    data = conn.recv(1024)
-    print(data)
-    t, s, r = rapiro.command(data)
-    if not data: break
-    conn.send(r)
+    try:
+        data = conn.recv(1024)
+        print(data)
+        t, s, r = rapiro.command(data)
+        if not data: break
+        conn.send(r)
+    except:
+        pass
 conn.close()
