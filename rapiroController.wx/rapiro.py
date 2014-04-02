@@ -13,6 +13,10 @@ if os.name == 'posix':
 else:
     com = sys.stdout
 
+def a2dist(v):
+    d = 26.59*pow(v/1024.0*5.0,-1.209)
+    return(d)
+
 def rxData():
     global _str
     while (1):
@@ -31,9 +35,15 @@ def command(data):
         t = 'x'
         s = 'Not define'
     if t == 'a':
+        """
+        Arduino
+        """
         com.write(s)
         r = com.readline()
     elif t == 'p':
+        """
+        Raspberry pi
+        """
         os.system(s)
     else:
         pass

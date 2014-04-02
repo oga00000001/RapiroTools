@@ -5,6 +5,7 @@ import socket
 import time
 import re
 import os
+import rapiro
 
 wildcard = "txt files (*.txt)|*.txt|"    \
            "All files (*.*)|*.*"
@@ -17,6 +18,7 @@ TIME = 1
 MOTION_TIMES = 5
 CONNECTED = False
 VERSION = '#E'
+dist = 0
 
 servo_pos = [90,90,0,130,90,180,50,90,90,90,90,90]
 cmd_str = ['S00','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11']
@@ -117,47 +119,33 @@ led_collection = {
     3002:['B',wx.SL_HORIZONTAL, led_val[2], 0, 255, 2,'#FFFFFF','#0000FF']
 }
 
-
-
-
-
 class resAnalysis:
     def __init__(self, string):
+        """
+        H: header
+        T:time    / t:time(int)
+        V:vlotage / v:voltage(int)
+        """
         #print string
         self.string = string
         d = re.split('(#?[A-Z][0-9]*)',string)
         self.items = []
-        self.SH = '#E'
+        self.H = '#E'
         self.T = 'T000'
         self.t = 0
+        self.V = 'V000'
+        self.v = 0
         for c in d:
             if c != "":
                 self.items.append(c)
                 if re.match('T[0-9]*',c):
                     self.T = c
                     self.t = int(re.sub('T','',c))
+                if re.match('V[0-9]*',c):
+                    self.V = c
+                    self.v = int(re.sub('V','',c))
                 if re.match('#',c):
-                    self.SH = c
-
-def OnSaveAs():
-
-    saveFileDialog = wx.FileDialog(self, "Save XYZ file", "", "",
-                                   "XYZ files (*.xyz)|*.xyz", wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-
-    if saveFileDialog.ShowModal() == wx.ID_CANCEL:
-        return     # the user changed idea...
-
-    # save the current contents in the file
-    # this can be done with e.g. wxPython output streams:
-    output_stream = wx.FileOutputStream(saveFileDialog.GetPath())
-
-    if not output_stream.IsOk():
-        wx.LogError("Cannot save current contents in file '%s'."%saveFileDialog.GetPath())
-        return
-
-def saveFile():
-    pass
-
+                    self.H = c
 
 
 class RapiroFrame(wx.Frame):
@@ -173,8 +161,9 @@ class RapiroFrame(wx.Frame):
         #self.SetMenuBar(RapiroMenu())
 
         #    本体部分の構築
-        root_panel = wx.Panel(self,wx.ID_ANY)
 
+        root_panel = wx.Panel(self,wx.ID_ANY)
+        nb = wx.Notebook(root_panel)
         host_panel       = HostPanel(root_panel)
         action_panel     = ActionPanel(root_panel)
         servo_panel      = ServoPanel(root_panel)
@@ -189,6 +178,7 @@ class RapiroFrame(wx.Frame):
         root_layout.Add(servo_panel,0,wx.GROW|wx.LEFT|wx.RIGHT,border=20)
         root_layout.Add(edit_panel,0,wx.GROW|wx.ALL,border=10)
         root_layout.Add(motion_panel,0,wx.GROW|wx.ALL,border=10)
+
         root_panel.SetSizer(root_layout)
         root_layout.Fit(root_panel)
 
@@ -259,7 +249,6 @@ class HostPanel(wx.Panel):
 class ActionPanel(wx.Panel):
 
     def __init__(self,parent):
-
         wx.Panel.__init__(self,parent,wx.ID_ANY)
 
         layout = wx.FlexGridSizer(5,5,3,3)
@@ -270,7 +259,7 @@ class ActionPanel(wx.Panel):
         self.SetSizer(layout)
 
     def click_action(self, event):
-        global VERSION
+        global VERSION, dist
         try:
             #print VERSION
             if VERSION == '#E':
@@ -282,7 +271,11 @@ class ActionPanel(wx.Panel):
         if CONNECTED:
             sendCommand(act[1])
             rapiroResponse = s.recv(8192)
-            frame.SetStatusText("Received value is " + str(rapiroResponse))
+            if resAnalysis(rapiroResponse).H=="#A6":
+                dist = rapiro.a2dist(resAnalysis(rapiroResponse).v)
+            else:
+                dist = 0
+            frame.SetStatusText("Received value is %s %4.2f" %( str(rapiroResponse), dist))
 
 
 class ServoPanel(wx.Panel):
@@ -549,5 +542,6 @@ def sendCommand(cmd):
 if __name__ == "__main__":
     application = wx.App()
     frame = RapiroFrame()
+
     frame.Show()
     application.MainLoop()

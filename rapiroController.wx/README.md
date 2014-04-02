@@ -1,5 +1,5 @@
-# Rapiro controller with motion editor
-## File
+## Rapiro controller with motion editor
+### File
  * server script
     * rapiro_server.py
     * rapiro.py
@@ -10,7 +10,7 @@
  * motion sample file
     * sample81.tx (#M8)
 
-## Preset control
+### Preset control
     Send string '#V'(Version Check) when connecting.
 
 |       |  #E   | #Ver |
@@ -30,7 +30,7 @@
 |M8     | #M8   | #M08 |
 |M9     | #M9   | #M09 |
 |M10    | -     | -    |
-    
+
 ## Motion editor
 |    LABEL    | Command        |
 |-------------|----------------|
