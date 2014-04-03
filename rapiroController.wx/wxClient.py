@@ -5,7 +5,7 @@ import socket
 import time
 import re
 import os
-import rapiro
+#import rapiro
 
 wildcard = "txt files (*.txt)|*.txt|"    \
            "All files (*.*)|*.*"
@@ -163,11 +163,11 @@ class RapiroFrame(wx.Frame):
         #    本体部分の構築
 
         root_panel = wx.Panel(self,wx.ID_ANY)
-        nb = wx.Notebook(root_panel)
+        #nb = wx.Notebook(root_panel)
         host_panel       = HostPanel(root_panel)
         action_panel     = ActionPanel(root_panel)
-        servo_panel      = ServoPanel(root_panel)
         led_panel        = LedPanel(root_panel)
+        servo_panel      = ServoPanel(root_panel)
         edit_panel       = EditPanel(root_panel)
         motion_panel     = MotionPanel(root_panel)
 
@@ -500,7 +500,6 @@ class MotionPanel(wx.Panel):
         layout.Add(label1,flag=wx.SHAPED)
         text_motion_n = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (MOTION_TIMES),style=wx.TE_RIGHT)
         layout.Add(text_motion_n,flag=wx.GROW)
-        #self.text_port = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (PORT),style=wx.TE_RIGHT)
         for id in range(8):
             label = wx.StaticText(self,wx.GROW,(u"%s" % id),size = (100,20))
             layout.Add(label,flag=wx.SHAPED)
@@ -508,7 +507,7 @@ class MotionPanel(wx.Panel):
             #text_motion[id].Enable()
             text_motion[id].Disable()
             layout.Add(text_motion[id],flag=wx.GROW)
-            layout.AddGrowableCol(id)
+        #    layout.AddGrowableCol(id)
         self.SetSizer(layout)
 
 def list2str(l):
@@ -542,6 +541,5 @@ def sendCommand(cmd):
 if __name__ == "__main__":
     application = wx.App()
     frame = RapiroFrame()
-
     frame.Show()
     application.MainLoop()
