@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-
+from math import pi as pi
 import wx
+import wx.lib.agw.speedmeter as SM
 import socket
 import time
 import re
 import os
-#import rapiro
+import rapiro
 
 wildcard = "txt files (*.txt)|*.txt|"    \
            "All files (*.*)|*.*"
@@ -14,7 +15,7 @@ wildcard = "txt files (*.txt)|*.txt|"    \
 HOST = '192.168.1.81'    # The remote host
 #HOST = 'rapiro.local'    # The remote host
 PORT = 12345              # The same port as used by the server
-TIME = 1
+TIME = 5
 MOTION_TIMES = 5
 CONNECTED = False
 VERSION = '#E'
@@ -41,6 +42,7 @@ frame_list =list(frame_tuple)
 rapiroResponse = ''
 index = 0
 text_motion = [0,0,0,0,0,0,0,0]
+radiobutton = [True,False,False,False,False,False,False,False]
 
 edit_collection = {
     4000:["M-Clear",0],
@@ -114,9 +116,11 @@ servo_collection = {
 }
 
 led_collection = {
-    3000:['R',wx.SL_HORIZONTAL, led_val[0], 0, 255, 0,'#FFFFFF','#FF0000'],
-    3001:['G',wx.SL_HORIZONTAL, led_val[1], 0, 255, 1,'#FFFFFF','#00FF00'],
-    3002:['B',wx.SL_HORIZONTAL, led_val[2], 0, 255, 2,'#FFFFFF','#0000FF']
+    3000:[-1],
+    3001:['R',wx.SL_HORIZONTAL, led_val[0], 0, 255, 0,'#FFFFFF','#FF0000'],
+    3002:['G',wx.SL_HORIZONTAL, led_val[1], 0, 255, 1,'#FFFFFF','#00FF00'],
+    3003:['B',wx.SL_HORIZONTAL, led_val[2], 0, 255, 2,'#FFFFFF','#0000FF'],
+    3004:[-1]
 }
 
 class resAnalysis:
@@ -147,228 +151,224 @@ class resAnalysis:
                 if re.match('#',c):
                     self.H = c
 
-
-class RapiroFrame(wx.Frame):
+class mainFrame(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self,None,wx.ID_ANY,u"Rapiro",size=(600,900))
-        log = 'log'
-        #    ステータスバーの初期化
+        wx.Frame.__init__(self,None,wx.ID_ANY,u"Rapiro",size=(600,840))
+
         self.CreateStatusBar()
         self.SetStatusText("Rapiro")
         self.GetStatusBar().SetBackgroundColour(None)
 
-        #    メニューバーの初期化
-        #self.SetMenuBar(RapiroMenu())
+        root_panel = wx.Panel(self, wx.ID_ANY)
 
-        #    本体部分の構築
+        nb = wx.Notebook(root_panel)
+        pnl1 = mainPanel(nb)
+        pnl2 = analogPanel(nb)
+        pnl3 = wx.Panel(nb, -1)
+        nb.AddPage(pnl1, 'Page 1')
+        nb.AddPage(pnl2, 'Page 2')
+        nb.AddPage(pnl3, 'Page 3')
+        #nb.AddPage(host_panel, 'Page 3')
 
-        root_panel = wx.Panel(self,wx.ID_ANY)
-        #nb = wx.Notebook(root_panel)
-        host_panel       = HostPanel(root_panel)
-        action_panel     = ActionPanel(root_panel)
-        led_panel        = LedPanel(root_panel)
-        servo_panel      = ServoPanel(root_panel)
-        edit_panel       = EditPanel(root_panel)
-        motion_panel     = MotionPanel(root_panel)
 
+        #StTxt = wx.StaticText(pnl1, -1, 'Text', pos=(20,30))
         root_layout = wx.BoxSizer(wx.VERTICAL)
-        root_layout.Add(host_panel,0,wx.GROW|wx.ALL,border=10)
-        root_layout.Add(action_panel,0,wx.GROW|wx.ALL,border=10)
-        root_layout.Add(led_panel,0,wx.GROW|wx.ALL,border=10)
-        root_layout.Add(servo_panel,0,wx.GROW|wx.LEFT|wx.RIGHT,border=20)
-        root_layout.Add(edit_panel,0,wx.GROW|wx.ALL,border=10)
-        root_layout.Add(motion_panel,0,wx.GROW|wx.ALL,border=10)
-
+        root_layout.Add(nb, 1, wx.EXPAND)
         root_panel.SetSizer(root_layout)
-        root_layout.Fit(root_panel)
 
-class RapiroMenu(wx.MenuBar):
-
-    def __init__(self):
-
-        wx.MenuBar.__init__(self)
-
-        menu_file = wx.Menu()
-        menu_file.Append(wx.ID_ANY,u"保存")
-        menu_file.Append(wx.ID_ANY,u"終了")
-        #menu_edit = wx.Menu()
-        #menu_edit.Append(wx.ID_ANY,u"コピー")
-        #menu_edit.Append(wx.ID_ANY,u"ペースト")
-
-        self.Append(menu_file,u"ファイル")
-        #self.Append(menu_edit,u"編集")
-
-class HostPanel(wx.Panel):
-
-    def __init__(self,parent):
-
-        wx.Panel.__init__(self,parent,wx.ID_ANY)
-
-        self.text_host = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (HOST),style=wx.TE_RIGHT)
-        self.text_port = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (PORT),style=wx.TE_RIGHT)
-        self.button_conn = wx.ToggleButton(self,wx.ID_ANY,u"CONNECT",style=wx.TE_RIGHT)
-        self.Bind(wx.EVT_TOGGLEBUTTON, self.click_button_conn)
-        #layout = wx.BoxSizer(wx.HORIZONTAL)
-        layout = wx.FlexGridSizer(1,3,3,3)
-
-        layout.Add(self.text_host,1,wx.GROW)
-        layout.Add(self.text_port,1)
-        layout.Add(self.button_conn,1)
-        self.SetSizer(layout)
-
-    def click_button_conn(self, event):
-        st = self.button_conn.GetValue()
-        if (st):
-            self.button_conn.SetLabel(u'DISCONNECT')
-            self.connectServer()
-        else:
-            self.button_conn.SetLabel(u'CONNECT')
-            self.close()
-        pass
-
-    def connectServer(self):
-        global s, CONNECTED, VERSION
-        HOST = self.text_host.GetValue()
-        PORT = self.text_port.GetValue()
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            s.connect((HOST, int(PORT)))
-            CONNECTED = True
-            VERSION = checkVersion()
-            frame.SetStatusText("Version value is " + str(VERSION))
-
-        except:
-            self.button_conn.SetLabel(u'CONNECT')
-            self.button_conn.SetValue(False)
-            CONNECTED = False
-
-    def close(self):
-        global servo_collection
-        s.close()
-
-class ActionPanel(wx.Panel):
-
+class analogPanel(wx.Panel):
     def __init__(self,parent):
         wx.Panel.__init__(self,parent,wx.ID_ANY)
 
-        layout = wx.FlexGridSizer(5,5,3,3)
-        for id, val in action_collection.items():
-            b = wx.Button(self,id,val[0],size=(60,25))
-            layout.Add(b ,1,wx.GROW)
-            b.Bind(wx.EVT_BUTTON, self.click_action)
-        self.SetSizer(layout)
+        self.timer = wx.PyTimer(self.ClockTimer)
+        self.currvalue = 0
 
-    def click_action(self, event):
-        global VERSION, dist
-        try:
-            #print VERSION
-            if VERSION == '#E':
-                act = action_collection[event.GetId()]
-            else:
-                act = action_collection0[event.GetId()]
-        except:
-            pass
+        panel = wx.Panel(self, -1)
+        sizer = wx.FlexGridSizer(2, 3, 2, 5)
+
+        panel1 = wx.Panel(panel, -1, style=wx.SUNKEN_BORDER)
+
+
+        self.SpeedWindow1 = SM.SpeedMeter(panel1,
+                                            agwStyle=SM.SM_DRAW_HAND|
+                                            SM.SM_DRAW_SECTORS|
+                                            SM.SM_DRAW_MIDDLE_TEXT|
+                                            SM.SM_DRAW_SECONDARY_TICKS
+                                            )
+
+        self.SpeedWindow1.SetAngleRange(1*pi/8, 7*pi/8)
+        intervals = range(0, 51, 5)
+        self.SpeedWindow1.SetIntervals(intervals)
+        colours = [wx.WHITE]*10
+        self.SpeedWindow1.SetIntervalColours(colours)
+        ticks = [str(interval) for interval in intervals]
+        self.SpeedWindow1.SetTicks(ticks)
+        self.SpeedWindow1.SetTicksColour(wx.BLACK)
+        #self.SpeedWindow1.SetNumberOfSecondaryTicks(2)
+        self.SpeedWindow1.SetTicksFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.NORMAL))
+        self.SpeedWindow1.SetMiddleText("cm")
+        self.SpeedWindow1.SetMiddleTextColour(wx.BLACK)
+        self.SpeedWindow1.SetMiddleTextFont(wx.Font(16, wx.SWISS, wx.NORMAL, wx.BOLD))
+        self.SpeedWindow1.SetHandColour(wx.Colour(255, 50, 0))
+        self.SpeedWindow1.DrawExternalArc(False)
+        self.SpeedWindow1.SetSpeedValue(0)
+
+        button1 = wx.Button(panel1, -1, "Start")
+        self.stopped = 1
+        button1.Bind(wx.EVT_BUTTON, self.click_button1)
+
+
+        bsizer1 = wx.BoxSizer(wx.VERTICAL)
+        hsizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        hsizer1.Add(button1, 0, wx.LEFT, 5)
+        #hsizer1.Add(stattext1, 1, wx.EXPAND)
+
+        bsizer1.Add(self.SpeedWindow1, 1, wx.EXPAND)
+        bsizer1.Add(hsizer1, 0, wx.EXPAND)
+        panel1.SetSizer(bsizer1)
+        bsizer1.Layout()
+
+
+        sizer.Add(panel1, 1, wx.EXPAND)
+
+        sizer.AddGrowableRow(0)
+        sizer.AddGrowableCol(0)
+
+        panel.SetSizer(sizer)
+
+        mainSizer = wx.BoxSizer(wx.VERTICAL)
+        mainSizer.Add(panel, 1, wx.EXPAND)
+        self.SetSizer(mainSizer)
+        mainSizer.Layout()
+        #self.timer.Start(2000)
+
+    def ClockTimer(self):
+        global CONNECTED,dist
+        command = "a,#A6\n"
         if CONNECTED:
-            sendCommand(act[1])
+            sendCommand(command)
             rapiroResponse = s.recv(8192)
             if resAnalysis(rapiroResponse).H=="#A6":
                 dist = rapiro.a2dist(resAnalysis(rapiroResponse).v)
             else:
                 dist = 0
-            frame.SetStatusText("Received value is %s %4.2f" %( str(rapiroResponse), dist))
 
 
-class ServoPanel(wx.Panel):
+        self.SpeedWindow1.SetMiddleText("%3.2f" % dist)
+        self.SpeedWindow1.SetSpeedValue(dist)
+
+    def click_button1(self, event):
+        btn = event.GetEventObject()
+
+        if self.stopped == 0:
+            self.stopped = 1
+            self.timer.Stop()
+            btn.SetLabel("Start")
+        else:
+            self.stopped = 0
+            self.timer.Start(2000)
+            btn.SetLabel("Stop")
+
+class mainPanel(wx.Panel):
+
     def __init__(self,parent):
+        global text_motion,frame_list, MOTION_TIMES,radiobutton
 
         wx.Panel.__init__(self,parent,wx.ID_ANY)
+        self.text_host = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (HOST),style=wx.TE_RIGHT)
+        self.text_port = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (PORT),style=wx.TE_RIGHT)
+        self.button_conn = wx.ToggleButton(self,wx.ID_ANY,u"CONNECT",style=wx.TE_RIGHT)
+        self.button_conn.Bind(wx.EVT_TOGGLEBUTTON, self.click_button_conn)
 
-        layout = wx.FlexGridSizer(5,5,3,3)
-        for id, val in servo_collection.items():
-            if val[0] >= 0:
-                #slider = wx.Slider(self,id,val[0],size=(30,25))
-                slider = wx.Slider(self,id,style=val[1]|wx.SL_LABELS)
-                layout.Add(slider ,1)
-                slider.SetMin(val[3])
-                slider.SetMax(val[4])
-                slider.SetValue(val[2])
-                slider.Bind(wx.EVT_SLIDER, self.slider_servo)
-            else:
-                text = wx.StaticText(self,id,'')
-                layout.Add(text, 1, wx.GROW)
+        self.text1 = wx.StaticText(self,wx.ID_ANY,'')
+        self.text2 = wx.StaticText(self,wx.ID_ANY,'')
+        #layout = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.SetSizer(layout)
+        layout0 = wx.FlexGridSizer(2,1,3,3)
+        layout1 = wx.FlexGridSizer(25,5,3,3)
+        layout2 = wx.FlexGridSizer(9,3,3,3)
+        layout0.Add(layout1, wx.EXPAND)
+        layout0.Add(layout2, wx.EXPAND)
 
-    def slider_servo(self,event):
-        sv = servo_collection[event.GetId()]
-        obj = event.GetEventObject()
-        angleNum = obj.GetValue()
-        angle=str(angleNum).zfill(3)
-        command = "a, #PS"+str(sv[0]).zfill(2)+"A"+angle+"T001\n"
-        #print command, event.GetId()
-        if CONNECTED:
-            sendCommand(command)
-            rapiroResponse = s.recv(8192)
-            frame.SetStatusText("Received value is " + str(rapiroResponse))
-        servo_pos[sv[0]] = angleNum
-
-class LedPanel(wx.Panel):
-    def __init__(self,parent):
-
-        wx.Panel.__init__(self,parent,wx.ID_ANY)
-
-        layout = wx.FlexGridSizer(1,3,3,3)
+        layout1.Add(self.text_host,1,wx.GROW)
+        layout1.Add(self.text_port,1)
+        layout1.Add(self.button_conn,1)
+        layout1.Add(self.text1, 1, wx.GROW)
+        layout1.Add(self.text2, 1, wx.GROW)
+        #PRISET
+        for id, val in action_collection.items():
+            b = wx.Button(self,id,val[0],size=(60,25))
+            layout1.Add(b ,1,wx.GROW)
+            b.Bind(wx.EVT_BUTTON, self.click_action)
+        #LED
         for id, val in led_collection.items():
             if val[0] >= 0:
                 #label1 = wx.StaticText(self,wx.GROW,u"%s" % val[0],size = (20,20) )
                 #label1.SetBackgroundColour(val[6])
-                #layout.Add(label1,flag=wx.SHAPED)
+                #layout1.Add(label1,flag=wx.SHAPED)
                 slider = wx.Slider(self,id,style=val[1]|wx.SL_LABELS)
                 slider.SetForegroundColour(val[6])
                 slider.SetBackgroundColour(val[7])
-                layout.Add(slider ,1)
+                layout1.Add(slider ,1)
                 slider.SetMin(val[3])
                 slider.SetMax(val[4])
                 slider.SetValue(val[2])
                 slider.Bind(wx.EVT_SLIDER, self.slider_led)
             else:
                 text = wx.StaticText(self,id,'')
-                layout.Add(text, 1, wx.GROW)
+                layout1.Add(text, 1, wx.GROW)
+        # servo
+        for id, val in servo_collection.items():
+            if val[0] >= 0:
+                #slider = wx.Slider(self,id,val[0],size=(30,25))
+                slider = wx.Slider(self,id,style=val[1]|wx.SL_LABELS)
+                layout1.Add(slider ,1)
+                slider.SetMin(val[3])
+                slider.SetMax(val[4])
+                slider.SetValue(val[2])
+                slider.Bind(wx.EVT_SLIDER, self.slider_servo)
+            else:
+                text = wx.StaticText(self,id,'')
+                layout1.Add(text, 1, wx.GROW)
 
-        self.SetSizer(layout)
-
-    def slider_led(self, event):
-        color = led_collection[event.GetId()]
-        obj = event.GetEventObject()
-        brightNum=obj.GetValue()
-        bright=str(brightNum).zfill(3)
-        command = "a, #P"+str(color[0])+bright+"T002\n"
-        #print command, event.GetId()
-        if CONNECTED:
-            sendCommand(command)
-            rapiroResponse = s.recv(8192)
-            frame.SetStatusText("Received value is " + str(rapiroResponse))
-        led_val[color[5]] = brightNum
-
-
-class EditPanel(wx.Panel):
-    def __init__(self,parent):
-
-        wx.Panel.__init__(self,parent,wx.ID_ANY)
-
-        layout = wx.FlexGridSizer(1,7,3,3)
+        #edit
         for id, val in edit_collection.items():
             b = wx.Button(self,id,val[0],size=(60,25))
-            layout.Add(b ,1,wx.GROW)
+            layout1.Add(b ,1,wx.GROW)
             b.Bind(wx.EVT_BUTTON, self.click_edit)
+        self.label_time = wx.StaticText(self,wx.ID_ANY,u"TIME")
+        self.text_time   = wx.TextCtrl(self,wx.ID_ANY,"%d" % (TIME),style=wx.TE_RIGHT)
+        layout1.Add(self.label_time,1)
+        layout1.Add(self.text_time,1)
+        #self.SetSizer(layout1)
+        #motion
+        label1 = wx.StaticText(self,wx.GROW,u"Repeat",size = (50,20) )
+        layout2.Add(label1,flag=wx.SHAPED)
+        text_motion_n = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (MOTION_TIMES),style=wx.TE_RIGHT,size=(40,20))
+        layout2.Add(text_motion_n,flag=wx.GROW)
+        label2 = wx.StaticText(self,wx.GROW,u"",size = (20,20) )
+        layout2.Add(label2,flag=wx.SHAPED)
+        #self.text_port = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (PORT),style=wx.TE_RIGHT)
+        for id in range(8):
+            label = wx.StaticText(self,wx.GROW,(u"%s" % id),size = (40,20))
+            layout2.Add(label,flag=wx.SHAPED)
+            radiobutton[id] = wx.RadioButton(self, 5000+id, "")
+            radiobutton[id].Bind(wx.EVT_RADIOBUTTON, self.selected_radiobutton)
+            layout2.Add(radiobutton[id],flag=wx.GROW)
+            text_motion[id] = wx.TextCtrl(self,id,list2str(frame_list[id]),style=wx.TE_LEFT,size = (380,20))
+            #text_motion[id].Enable()
+            text_motion[id].Disable()
+            layout2.Add(text_motion[id],flag=wx.GROW)
+            layout2.AddGrowableCol(id)
+        self.SetSizer(layout0)
+        radiobutton[0].SetValue(True)
 
-        self.text_time = wx.TextCtrl(self,wx.ID_ANY,"%d" % (TIME),style=wx.TE_RIGHT)
-        layout.Add(self.text_time,1)
-        self.SetSizer(layout)
-
-
+    def selected_radiobutton(self,event):
+        global index
+        index = event.GetId() - 5000
+        pass
     def click_edit(self, event):
-        global frame_list,rapiroResponse, index, text_motion
+        global frame_list,rapiroResponse, index, text_motion, radiobutton
         try:
             edit = edit_collection[event.GetId()]
         except:
@@ -387,6 +387,7 @@ class EditPanel(wx.Panel):
             index +=1
             if index > 7:
                 index = 0
+            radiobutton[index].SetValue(True)
 
         elif edit[0] == 'M-Clear':
             clearMotion()
@@ -395,7 +396,7 @@ class EditPanel(wx.Panel):
         elif edit[0] == 'M-Play':
             for m in range(5):
                 for frame in  frame_list:
-                    #print frame
+                   #print frame
                     if frame[15]==0:
                         break
                     #print servo_step, led_step
@@ -491,24 +492,83 @@ class EditPanel(wx.Panel):
         f.close()
 
 
-class MotionPanel(wx.Panel):
-    def __init__(self,parent):
-        global text_motion,frame_list, MOTION_TIMES
-        wx.Panel.__init__(self,parent,wx.ID_ANY)
-        layout = wx.FlexGridSizer(9,2,3,3)
-        label1 = wx.StaticText(self,wx.GROW,u"Repeat",size = (100,20) )
-        layout.Add(label1,flag=wx.SHAPED)
-        text_motion_n = wx.TextCtrl(self,wx.ID_ANY,u"%s" % (MOTION_TIMES),style=wx.TE_RIGHT)
-        layout.Add(text_motion_n,flag=wx.GROW)
-        for id in range(8):
-            label = wx.StaticText(self,wx.GROW,(u"%s" % id),size = (100,20))
-            layout.Add(label,flag=wx.SHAPED)
-            text_motion[id] = wx.TextCtrl(self,id,list2str(frame_list[id]),style=wx.TE_LEFT,size = (400,20))
-            #text_motion[id].Enable()
-            text_motion[id].Disable()
-            layout.Add(text_motion[id],flag=wx.GROW)
-        #    layout.AddGrowableCol(id)
-        self.SetSizer(layout)
+
+    def click_button_conn(self, event):
+        st = self.button_conn.GetValue()
+        if (st):
+            self.button_conn.SetLabel(u'DISCONNECT')
+            self.connectServer()
+        else:
+            self.button_conn.SetLabel(u'CONNECT')
+            self.close()
+        pass
+
+    def connectServer(self):
+        global s, CONNECTED, VERSION
+        HOST = self.text_host.GetValue()
+        PORT = self.text_port.GetValue()
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((HOST, int(PORT)))
+            CONNECTED = True
+            VERSION = checkVersion()
+            frame.SetStatusText("Version value is " + str(VERSION))
+
+        except:
+            self.button_conn.SetLabel(u'CONNECT')
+            self.button_conn.SetValue(False)
+            CONNECTED = False
+
+    def close(self):
+        global servo_collection
+        s.close()
+
+    def click_action(self, event):
+        global VERSION, dist
+        try:
+            #print VERSION
+            if VERSION == '#E':
+                act = action_collection[event.GetId()]
+            else:
+                act = action_collection0[event.GetId()]
+        except:
+            pass
+        if CONNECTED:
+            sendCommand(act[1])
+            rapiroResponse = s.recv(8192)
+            if resAnalysis(rapiroResponse).H=="#A6":
+                dist = rapiro.a2dist(resAnalysis(rapiroResponse).v)
+            else:
+                dist = 0
+            frame.SetStatusText("Received value is %s %4.2f" %( str(rapiroResponse), dist))
+        else:
+            frame.SetStatusText("not connect" )
+
+    def slider_led(self, event):
+        color = led_collection[event.GetId()]
+        obj = event.GetEventObject()
+        brightNum=obj.GetValue()
+        bright=str(brightNum).zfill(3)
+        command = "a, #P"+str(color[0])+bright+"T002\n"
+        #print command, event.GetId()
+        if CONNECTED:
+            sendCommand(command)
+            rapiroResponse = s.recv(8192)
+            frame.SetStatusText("Received value is " + str(rapiroResponse))
+        led_val[color[5]] = brightNum
+
+    def slider_servo(self,event):
+        sv = servo_collection[event.GetId()]
+        obj = event.GetEventObject()
+        angleNum = obj.GetValue()
+        angle=str(angleNum).zfill(3)
+        command = "a, #PS"+str(sv[0]).zfill(2)+"A"+angle+"T001\n"
+        #print command, event.GetId()
+        if CONNECTED:
+            sendCommand(command)
+            rapiroResponse = s.recv(8192)
+            frame.SetStatusText("Received value is " + str(rapiroResponse))
+        servo_pos[sv[0]] = angleNum
 
 def list2str(l):
     s = ''
@@ -540,6 +600,6 @@ def sendCommand(cmd):
 
 if __name__ == "__main__":
     application = wx.App()
-    frame = RapiroFrame()
+    frame = mainFrame()
     frame.Show()
     application.MainLoop()
