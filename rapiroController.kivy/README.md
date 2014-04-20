@@ -10,7 +10,7 @@
     * android.txt
 
 ### client setup
-#### Android 
+#### Android (checked Nexus7(2012))
     * instal Kivy Launcher
         * https://play.google.com/store/apps/details?id=org.kivy.pygame
     
