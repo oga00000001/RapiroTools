@@ -1,4 +1,19 @@
 #:kivy 1.0
+<LabeledSlider@Slider>:
+    step: 1
+    Label:
+        text: '{}'.format(int(root.value))
+        size: self.texture_size
+        top: root.center_y - sp(20)
+        center_x: root.value_pos[0]
+<LabeledSliderV@Slider>:
+    step: 1
+    Label:
+        text: '{}'.format(int(root.value))
+        size: self.texture_size
+        #top: root.center_x - sp(2000)
+        center_y: root.value_pos[1]
+        center_x: root.value_pos[0] + sp(40)
 <Controller>:
     BoxLayout:
         orientation: 'vertical'
@@ -6,7 +21,7 @@
         padding: 5
         BoxLayout:
             size_hint_y: None
-            height: 50
+            height: 40
             orientation: 'horizontal'
             TextInput:
                 id: ip
@@ -89,6 +104,34 @@
                 text: 'M10'
                 on_press: root.do_action('a,#M10\n')
                 #on_release: root.do_action('a,#M00\n')
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            orientation: 'horizontal'
+            LabeledSlider:
+                id: SR
+                step: 1
+                min: 0
+                max: 255
+                value: 0
+                orientation: 'horizontal'
+                on_value: root.do_led('R', int(self.value))
+            LabeledSlider:
+                id: SG
+                step: 1
+                min: 0
+                max: 255
+                value: 0
+                orientation: 'horizontal'
+                on_value: root.do_led('G', int(self.value))
+            LabeledSlider:
+                id: SB
+                step: 1
+                min: 0
+                max: 255
+                value: 255
+                orientation: 'horizontal'
+                on_value: root.do_led('B', int(self.value))
         GridLayout:
             #size_hint_y: None
             #hight: 50
@@ -96,7 +139,7 @@
             rows: 5
             Label:
             Label:
-            Slider:
+            LabeledSlider:
                 id: s0
                 step: 1
                 min: 0
@@ -106,7 +149,7 @@
                 on_value: root.do_slide('S00', int(self.value), 1)
             Label:
             Label:
-            Slider:
+            LabeledSlider:
                 id: s3
                 step: 1
                 min: 0
@@ -114,7 +157,7 @@
                 value: 130
                 orientation: 'horizontal'
                 on_value: root.do_slide('S03', int(self.value), 1)
-            Slider:
+            LabeledSliderV:
                 id: s2
                 step: 1
                 min: 0
@@ -123,7 +166,7 @@
                 orientation: 'vertical'
                 on_value: root.do_slide('S02', int(self.value), 1)
             Label:
-            Slider:
+            LabeledSliderV:
                 id: s5
                 step: 1
                 min: 0
@@ -131,7 +174,7 @@
                 value: 0
                 orientation: 'vertical'
                 on_value: root.do_slide('S05', int(self.value), -1)
-            Slider:
+            LabeledSlider:
                 id: s6
                 step: 1
                 min: 50
@@ -139,7 +182,7 @@
                 value: 50
                 orientation: 'horizontal'
                 on_value: root.do_slide('S06', int(self.value), 1)
-            Slider:
+            LabeledSlider:
                 id: s4
                 step: 1
                 min: 70
@@ -148,7 +191,7 @@
                 orientation: 'horizontal'
                 on_value: root.do_slide('S04', int(self.value), -1)
             Label:
-            Slider:
+            LabeledSlider:
                 id: s1
                 step: 1
                 min: 0
@@ -157,7 +200,7 @@
                 orientation: 'horizontal'
                 on_value: root.do_slide('S01', int(self.value), 1)
             Label:
-            Slider:
+            LabeledSlider:
                 id: s7
                 step: 1
                 min: 60
@@ -166,7 +209,7 @@
                 orientation: 'horizontal'
                 on_value: root.do_slide('S07', int(self.value), -1)
             Label:
-            Slider:
+            LabeledSlider:
                 id: s9
                 step: 1
                 min: 60
@@ -175,7 +218,7 @@
                 orientation: 'horizontal'
                 on_value: root.do_slide('S09', int(self.value), -1)
             Label:
-            Slider:
+            LabeledSlider:
                 id: s11
                 step: 1
                 min: 60
@@ -185,7 +228,7 @@
                 on_value: root.do_slide('S11', int(self.value), -1)
             Label:
             Label:
-            Slider:
+            LabeledSlider:
                 id: s8
                 step: 1
                 min: 60
@@ -194,7 +237,7 @@
                 orientation: 'horizontal'
                 on_value: root.do_slide('S08', int(self.value), -1)
             Label:
-            Slider:
+            LabeledSlider:
                 id: s10
                 step: 1
                 min: 60
@@ -202,7 +245,7 @@
                 value: 90
                 orientation: 'horizontal'
                 on_value: root.do_slide('S10', int(self.value), -1)
-            Label:
+            LabeledSlider:
 #            Label:
 #                text: '{}'.format(int(s2.value))
 #            Label:

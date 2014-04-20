@@ -10,6 +10,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.app import App
 from kivy.properties import OptionProperty, ObjectProperty, StringProperty
 from kivy.uix.slider import Slider
+from kivy.lang import Builder
 
 TIME = 5
 MOTION_TIMES = 5
@@ -54,6 +55,13 @@ class Controller(FloatLayout):
         if rev < 0:
             angle = 180 - angle
         cmd = 'a, #P'+servo+'A'+str(angle).zfill(3)+'T001\n'
+        if CONNECTED:
+            sendCommand(cmd)
+            rapiroResponse = s.recv(8192)
+            print cmd
+
+    def do_led(self, ch, bright):
+        cmd = 'a, #P'+ch+str(bright).zfill(3)+'T001\n'
         if CONNECTED:
             sendCommand(cmd)
             rapiroResponse = s.recv(8192)
