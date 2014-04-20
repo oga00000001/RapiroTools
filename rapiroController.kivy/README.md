@@ -10,22 +10,22 @@
     * android.txt
 
 ### client setup
-Android 
-    *instal Kivy Launcher
-    https://play.google.com/store/apps/details?id=org.kivy.pygame
+#### Android 
+    * instal Kivy Launcher
+        * https://play.google.com/store/apps/details?id=org.kivy.pygame
     
     *create folder
-       /sdcard/kivy/rapiro
+        * /sdcard/kivy/rapiro
 
     *copy scripts
-     copy client scripts to /sdcard/kivy/rapiro
+        * copy client scripts to /sdcard/kivy/rapiro
 
     run Kivy Launcher and tap rapiro
 
-windows
+#### windows
     * python main.py
 
-raspberry pi
+#### raspberry pi
     * python main.py
 
 ### rapiro setup
