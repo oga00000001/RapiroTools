@@ -54,7 +54,7 @@ edit_collection = {
 }
 action_collection = {
     1000:["Analog", "a,#A6\n"],
-    1001:["Foward", "a,#M1\n"],
+    1001:["Forward","a,#M1\n"],
     1002:["C",      "a,#C\n"],
     1003:["M5",     "a,#M5\n"],
     1004:["M6",     "a,#M6\n"],
@@ -71,7 +71,7 @@ action_collection = {
     }
 action_collection0 = {
     1000:["Analog", "a,#A6\n"],
-    1001:["Foward", "a,#M01\n"],
+    1001:["Forward","a,#M01\n"],
     1002:["C",      "a,#C\n"],
     1003:["M5",     "a,#M05\n"],
     1004:["M6",     "a,#M06\n"],

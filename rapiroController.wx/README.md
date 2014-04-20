@@ -39,3 +39,6 @@
 |    M-Play   |   Motion Play  |
 |    F-Load   |   File Load    |
 |    F-Save   |   File Save    |
+
+sudo pip install ipget
+sudo pip install netaddr

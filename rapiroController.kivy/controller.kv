@@ -1,0 +1,212 @@
+#:kivy 1.0
+<Controller>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 5
+        padding: 5
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            orientation: 'horizontal'
+            TextInput:
+                id: ip
+                text: '192.168.1.81'
+            TextInput:
+                id: port
+                text: '12345'
+            ToggleButton:
+                group: 'net'
+                text: 'connect'
+                on_press: root.do_connect('CONN', ip.text, port.text)
+            ToggleButton:
+                group: 'net'
+                text: 'disconnect'
+                on_press: root.do_connect('DISCONN')
+            #Button:
+            #    text: 'exit'
+            #    on_press: root.on_pause()
+        GridLayout:
+            size_hint_y: 0.3
+            row_default_hight: 40
+            cols: 5
+            rows: 3
+            Button:
+                text: 'Analog'
+                on_press: root.do_action('a,#A6\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'Forward'
+                on_press: root.do_action('a,#M01\n')
+                on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'C'
+                on_press: root.do_action('a,#C\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'M5'
+                on_press: root.do_action('a,#M05\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'M6'
+                on_press: root.do_action('a,#M06\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'Left'
+                on_press: root.do_action('a,#M04\n')
+                on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'STOP'
+                on_press: root.do_action('a,#M00\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'Right'
+                on_press: root.do_action('a,#M03\n')
+                on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'M7'
+                on_press: root.do_action('a,#M07\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'M8'
+                on_press: root.do_action('a,#M08\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'OFF'
+                on_press: root.do_action('a,#H\n')
+            Button:
+                text: 'Back'
+                on_press: root.do_action('a,#M02\n')
+                on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'Q'
+                on_press: root.do_action('a,#Q\n')
+                #on_release: root.do_action('a,#M0\n')
+            Button:
+                text: 'M9'
+                on_press: root.do_action('a,#M09\n')
+                #on_release: root.do_action('a,#M00\n')
+            Button:
+                text: 'M10'
+                on_press: root.do_action('a,#M10\n')
+                #on_release: root.do_action('a,#M00\n')
+        GridLayout:
+            #size_hint_y: None
+            #hight: 50
+            cols: 5
+            rows: 5
+            Label:
+            Label:
+            Slider:
+                id: s0
+                step: 1
+                min: 0
+                max: 180
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S00', int(self.value), 1)
+            Label:
+            Label:
+            Slider:
+                id: s3
+                step: 1
+                min: 0
+                max: 130
+                value: 130
+                orientation: 'horizontal'
+                on_value: root.do_slide('S03', int(self.value), 1)
+            Slider:
+                id: s2
+                step: 1
+                min: 0
+                max: 180
+                value: 0
+                orientation: 'vertical'
+                on_value: root.do_slide('S02', int(self.value), 1)
+            Label:
+            Slider:
+                id: s5
+                step: 1
+                min: 0
+                max: 180
+                value: 0
+                orientation: 'vertical'
+                on_value: root.do_slide('S05', int(self.value), -1)
+            Slider:
+                id: s6
+                step: 1
+                min: 50
+                max: 180
+                value: 50
+                orientation: 'horizontal'
+                on_value: root.do_slide('S06', int(self.value), 1)
+            Slider:
+                id: s4
+                step: 1
+                min: 70
+                max: 120
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S04', int(self.value), -1)
+            Label:
+            Slider:
+                id: s1
+                step: 1
+                min: 0
+                max: 180
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S01', int(self.value), 1)
+            Label:
+            Slider:
+                id: s7
+                step: 1
+                min: 60
+                max: 110
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S07', int(self.value), -1)
+            Label:
+            Slider:
+                id: s9
+                step: 1
+                min: 60
+                max: 120
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S09', int(self.value), -1)
+            Label:
+            Slider:
+                id: s11
+                step: 1
+                min: 60
+                max: 120
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S11', int(self.value), -1)
+            Label:
+            Label:
+            Slider:
+                id: s8
+                step: 1
+                min: 60
+                max: 120
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S08', int(self.value), -1)
+            Label:
+            Slider:
+                id: s10
+                step: 1
+                min: 60
+                max: 120
+                value: 90
+                orientation: 'horizontal'
+                on_value: root.do_slide('S10', int(self.value), -1)
+            Label:
+#            Label:
+#                text: '{}'.format(int(s2.value))
+#            Label:
+#                text: '{}'.format(int(s1.value))
+
+
+

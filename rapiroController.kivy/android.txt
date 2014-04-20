@@ -1,0 +1,3 @@
+title=Rapiro
+author=oga
+orientation=portlate
