@@ -4,7 +4,7 @@
 | input | +Rpi   | +Camera| +Dongle|+Dongle |
 |-------|--------|--------|--------|--------|
 |       | 550mA  | 260mA  |  500mA |  500mA |
-|       | 550mA  |  810mA | 1310mA | 1810mA |
+| sum   | 550mA  |  810mA | 1310mA | 1810mA |
 | 5V    |   ?    |   ?    |   ?    |    ?   |
 | 6V    |   o    |    o   |   o    |    ?   | 
 | 9V    |   o    |    o   |   x    |    x   |
@@ -12,4 +12,8 @@
 
 See Loacurent chart.
 
-![chart](https://github.com/oga00000001/RapiroTools/blob/master/PowerSupply/loadcurrent.png)
+![chart](https://raw.githubusercontent.com/oga00000001/RapiroTools/master/PowerSupply/loadcurrent.png)
+
+![block](https://raw.githubusercontent.com/oga00000001/RapiroTools/master/PowerSupply/dcdc0.png)
+
+![dcdc](https://raw.githubusercontent.com/oga00000001/RapiroTools/master/PowerSupply/dcdc1.png)
