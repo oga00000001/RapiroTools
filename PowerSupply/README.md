@@ -2,8 +2,8 @@
 
 ###estimation
 | input | +Rpi   | +Camera| +Dongle|+Dongle |
-| AC/DC | 550mA  | 260mA  |  500mA |  500mA |
 |-------|--------|--------|--------|--------|
+|       | 550mA  | 260mA  |  500mA |  500mA |
 |       | 550mA  |  810mA | 1310mA | 1810mA |
 | 5V    |   ?    |   ?    |   ?    |    ?   |
 | 6V    |   o    |    o   |   o    |    ?   | 
