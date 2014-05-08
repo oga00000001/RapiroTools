@@ -10,7 +10,7 @@
 | 9V    |   o    |    o   |   x    |    x   |
 |12V    |   o    |    x   |   x    |    x   |
 
-See Loacurent chart.
+See Load curent chart.
 
 ![chart](https://raw.githubusercontent.com/oga00000001/RapiroTools/master/PowerSupply/loadcurrent.png)
 
